@@ -22,18 +22,69 @@ func TestMakingABoardFromAString(t *testing.T) {
 	is.True(board.IsCellDead(1, 1))
 }
 
+
+
 func TestHappyGeneration(t *testing.T) {
 	is := is.New(t)
-	input := `
+	for _, tc := range []struct{
+		description string
+		wantBoard     string
+		startingBoard string
+	}{
+	{
+		description: "Generation with 3 neighbour cell",
+		startingBoard: `
 **
 *-
-`
+`,
+		wantBoard: `
+**
+**
+`,
+	},
+	{
+		description: "Generation with 2 neighbour cell",
 
-	board := game.NewBoardFromString(input)
-	board.NextGeneration()
-	wantBoard := game.NewBoardFromString(`
+		startingBoard:`
 **
+--
+` ,
+		wantBoard: `
+--
+--
+`,
+	},
+		{
+			description: "Cell with no neighbours dies",
+			startingBoard:`
 *-
-`)
-	is.Equal(board, wantBoard)
+--
+` ,
+			wantBoard: `
+--
+--
+`,
+		},//the dead cell with three neighbours isnt getting set alive. Im pretty sure its cause we need a copy. gonna test it out
+		{
+			description: "4x4 generation with 3 neighbours",
+			startingBoard:`
+**--
+*---
+----
+----
+` ,
+			wantBoard: `
+**--
+**--
+----
+----
+`,
+		},
+}{
+	t.Run(tc.description, func(t *testing.T) {
+		gotBoard := game.NewBoardFromString(tc.startingBoard)
+		newBoard := gotBoard.NextGeneration()
+		is.Equal(newBoard.String(), tc.wantBoard)
+	})
+}
 }
